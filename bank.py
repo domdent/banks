@@ -13,19 +13,19 @@ class Bank(abcFinance.Agent):
         self.book(debit=[("cash", cash_reserves)])
         self.create("cash", cash_reserves)
 
-    def credit_deposits(self):
+    def credit_depositors(self):
         """
 
         """
-        self.book(credit=[(sender_ID + "_deposit", amount)])
+        for msg in self.get_messages("deposit"):
+            self.book()
 
 
     def print_possessions(self):
         """
 
         """
-        self.log("cash", self["money"])
-        self.log("money", self["money"])
+        self.log("cash", self["cash"])
 
 
 
