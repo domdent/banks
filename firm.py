@@ -12,9 +12,9 @@ class Firm(abcFinance.Agent):
 
         """
         self.create("goods", starting_inv)
-        firm_id_deposit = ("firm" + str(self.id) + "_deposit")
-        self.accounts.make_stock_accounts([firm_id_deposit, "goods"])
-        self.accounts.book(debit=[(firm_id_deposit, 1000), ("goods", 1000)], credit=[("equity", 2000)])
+        self.firm_id_deposit = ("firm" + str(self.id) + "_deposit")
+        self.accounts.make_stock_accounts([self.firm_id_deposit, "goods"])
+        self.accounts.book(debit=[(self.firm_id_deposit, 1000), ("goods", 1000)], credit=[("equity", 2000)])
         self.housebank = "bank" + str(random.randint(0, num_banks - 1))
 
 
@@ -31,7 +31,7 @@ class Firm(abcFinance.Agent):
         for offer in self.get_offers("goods"):
             if self["goods"] > 2:
                 self.accept(offer)
-                self.book(debit=[((self.id + "_deposit"), 100)], credit=[("goods", 100)])
+                self.book(debit=[(self.firm_id_deposit, 100)], credit=[("goods", 100)])
 
     def print_possessions(self):
         """

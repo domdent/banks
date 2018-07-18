@@ -23,7 +23,7 @@ class Bank(abcFinance.Agent):
         for msg in messages:
             sender = msg.sender
             amount = msg.content
-            if len(sender) > 1:
+            if len(sender) > 1 and type(sender) == tuple:
                 sender = sender[0] + str(sender[1])
             print(sender)
             self.accounts.make_liability_accounts([(sender + "_deposit")])

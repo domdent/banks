@@ -13,13 +13,15 @@ class People(abcFinance.Agent):
         self.population = population
         self.create("deposits", starting_money)
         self.accounts.make_stock_accounts(["goods"])
+        self.accounts.make_flow_accounts(["consumption_expenses"])
         self.num_firms = num_firms
         self.num_banks = num_banks
         # split deposits across banks
-        self.split_amount = float(self["deposits"]) / num_banks
+        split_amount = float(self["deposits"]) / num_banks
         for i in range(self.num_banks):
             bank_id = "bank" + str(i) + "_deposit"
             self.accounts.make_stock_accounts([bank_id])
+            self.accounts.book(debit=[(bank_id, split_amount)], credit=[("equity", split_amount)])
 
     def open_bank_acc(self):
         # for each bank send "deposit" so they can add it to their credit
@@ -36,7 +38,7 @@ class People(abcFinance.Agent):
         buy from a random firm
         """
         firm_number = random.randint(0, self.num_firms - 1)
-        self.buy(('firm', firm_number), good='produce', quantity=2, price=50)
+        self.buy(('firm', firm_number), good='goods', quantity=2, price=50)
         bank_acc = "bank" + str(random.randint(0, self.num_banks - 1))
         self.book(debit=[("goods", 100)], credit=[(bank_acc + "_deposit", 100)])
 
@@ -46,7 +48,15 @@ class People(abcFinance.Agent):
         """
         total_deposits = 0
         for i in range(self.num_banks - 1):
-            total_deposits += self.accounts["bank" + i + "_deposit"].get_balance()[1]
+            total_deposits += self.accounts["bank" + str(i) + "_deposit"].get_balance()[1]
         self.log("deposits", total_deposits)
         self.log("goods", self["goods"])
+
+    def create_income(self):
+        self.create("deposits", 10 * self.population)
+
+    def consume_goods(self):
+        self.destroy("goods", 1)
+        self.book(debit=[("consumption_expenses", 50)], credit=[("goods", 50)])
+
 

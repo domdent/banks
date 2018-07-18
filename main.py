@@ -4,8 +4,8 @@ from bank import Bank
 from firm import Firm
 from people import People
 
-num_firms = 3
-num_banks = 1
+num_firms = 4
+num_banks = 2
 num_days = 20
 # people
 starting_deposit_p = 1000
@@ -34,14 +34,22 @@ banks.credit_depositors()
 for r in range(num_days):
     simulation.time = r
 
+    people.create_income()
+
     people.buy_goods()
     firms.sell_goods()
 
-    all_agents.print_possessions()
-    all_agents.print_balance_sheet()
+    people.consume_goods()
 
+    # bank needs to transfer funds on their side??
 
+    for agent in [people, firms, banks]:
+        print(agent)
+        agent.print_possessions()
+        agent.print_balance_sheet()
+        print("END")
 
+    all_agents.book_end_of_period()
 
 
 print("DONE")
