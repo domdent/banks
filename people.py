@@ -1,5 +1,7 @@
 import abcFinance
+import abce
 import random
+
 
 class People(abcFinance.Agent):
     """
@@ -10,36 +12,41 @@ class People(abcFinance.Agent):
         self.name = "people"
         self.population = population
         self.create("deposits", starting_money)
-        self.make_stock_account(["goods"])
+        self.accounts.make_stock_accounts(["goods"])
         self.num_firms = num_firms
         self.num_banks = num_banks
         # split deposits across banks
         self.split_amount = float(self["deposits"]) / num_banks
         for i in range(self.num_banks):
-            self.make_stock_account(["bank" + str(i) + "_deposit", self.split_amount])
+            bank_id = "bank" + str(i) + "_deposit"
+            self.accounts.make_stock_accounts([bank_id])
 
     def open_bank_acc(self):
         # for each bank send "deposit" so they can add it to their credit
         # look into using autobook
         for i in range(self.num_banks):
+            print(i)
             bank_ID = "bank" + str(i)
             amount = self.accounts[bank_ID + "_deposit"].get_balance()[1]
-            self.send(bank_ID, "deposit", amount)
+            self.send_envelope(bank_ID, "deposit", amount)
 
 
     def buy_goods(self):
         """
         buy from a random firm
         """
-        firm_number = random.randint(0, self.num_firms)
+        firm_number = random.randint(0, self.num_firms - 1)
         self.buy(('firm', firm_number), good='produce', quantity=2, price=50)
-        self.book(debit=[("goods", 100)], credit=[("deposits", 100)])
+        bank_acc = "bank" + str(random.randint(0, self.num_banks - 1))
+        self.book(debit=[("goods", 100)], credit=[(bank_acc + "_deposit", 100)])
 
     def print_possessions(self):
         """
         prints possessions and logs money of a person agent
         """
-        self.log("deposits", self.get_balance(self.id + "_deposit")[1])
+        total_deposits = 0
+        for i in range(self.num_banks - 1):
+            total_deposits += self.accounts["bank" + i + "_deposit"].get_balance()[1]
+        self.log("deposits", total_deposits)
         self.log("goods", self["goods"])
-        for i in range(self.num_banks):
-            self.log([str(self.id) + "_deposit"])
+

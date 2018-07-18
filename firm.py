@@ -1,4 +1,5 @@
 import abcFinance
+import abce
 import random
 
 class Firm(abcFinance.Agent):
@@ -11,14 +12,15 @@ class Firm(abcFinance.Agent):
 
         """
         self.create("goods", starting_inv)
-        self.make_stock_account([self.id + "_deposit", "goods", "equity"])
-        self.book(debit=[(self.id + "_deposit", 1000), ("goods", 1000)],
-                  credit=[("equity", 2000)])
+        firm_id_deposit = ("firm" + str(self.id) + "_deposit")
+        self.accounts.make_stock_accounts([firm_id_deposit, "goods"])
+        self.accounts.book(debit=[(firm_id_deposit, 1000), ("goods", 1000)], credit=[("equity", 2000)])
         self.housebank = "bank" + str(random.randint(0, num_banks - 1))
 
 
     def open_bank_acc(self):
-        self.send(self.housebank, "deposit", 2000)
+        balance = self.accounts["firm" + str(self.id) + "_deposit"].get_balance()[1]
+        self.send_envelope(self.housebank, "deposit", balance)
 
 
     def sell_goods(self):
@@ -35,5 +37,5 @@ class Firm(abcFinance.Agent):
         """
         prints possessions and logs money of a person agent
         """
-        self.log("deposits", self.get_balance(self.id + "_deposit")[1])
+        self.log("deposits", self.accounts["firm" + str(self.id) + "_deposit"].get_balance()[1])
         self.log("goods", self["goods"])
