@@ -30,8 +30,23 @@ class Firm(abcFinance.Agent):
         """
         for offer in self.get_offers("goods"):
             if self["goods"] > 2:
+                sender_id = offer.sender
                 self.accept(offer)
                 self.book(debit=[(self.firm_id_deposit, 100)], credit=[("goods", 100)])
+                messages = self.get_messages("account")
+                msg_sender = ""
+                account = ""
+                for msg in messages:
+                    msg_sender = msg.sender
+                    account = msg.content
+                    if len(msg_sender) > 1 and type(msg_sender) == tuple:
+                        msg_sender = msg_sender[0] + str(msg_sender[1])
+                    if sender_id == msg_sender:
+                        self.send_envelope(account, "withdraw", sender_id)
+                        self.send_envelope(account, "amount", 100)
+                        self.send_envelope(self.housebank, "deposit", 100)
+                    else:
+                        print("WARNING: Message sender and buy offer sender DO NOT MATCH!")
 
     def print_possessions(self):
         """

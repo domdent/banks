@@ -6,7 +6,7 @@ from people import People
 
 num_firms = 4
 num_banks = 2
-num_days = 20
+num_days = 200
 # people
 starting_deposit_p = 1000
 population = 50
@@ -35,13 +35,14 @@ for r in range(num_days):
     simulation.time = r
 
     people.create_income()
+    banks.credit_income()
 
     people.buy_goods()
     firms.sell_goods()
+    # bank needs to transfer funds on their side??
+    banks.move_deposits()
 
     people.consume_goods()
-
-    # bank needs to transfer funds on their side??
 
     for agent in [people, firms, banks]:
         print(agent)

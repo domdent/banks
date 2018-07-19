@@ -13,7 +13,7 @@ class People(abcFinance.Agent):
         self.population = population
         self.create("deposits", starting_money)
         self.accounts.make_stock_accounts(["goods"])
-        self.accounts.make_flow_accounts(["consumption_expenses"])
+        self.accounts.make_flow_accounts(["consumption_expenses", "labour_value"])
         self.num_firms = num_firms
         self.num_banks = num_banks
         # split deposits across banks
@@ -41,6 +41,7 @@ class People(abcFinance.Agent):
         self.buy(('firm', firm_number), good='goods', quantity=2, price=50)
         bank_acc = "bank" + str(random.randint(0, self.num_banks - 1))
         self.book(debit=[("goods", 100)], credit=[(bank_acc + "_deposit", 100)])
+        self.send_envelope(('firm', firm_number), "account", bank_acc)
 
     def print_possessions(self):
         """
@@ -53,7 +54,15 @@ class People(abcFinance.Agent):
         self.log("goods", self["goods"])
 
     def create_income(self):
-        self.create("deposits", 10 * self.population)
+        self.create("deposits", 100 * self.population)
+        for i in range(self.num_banks):
+            bank_acc = "bank" + str(i)
+            self.book(debit=[(bank_acc + "_deposit", (100 * self.population)/self.num_banks)],
+                      credit=[("labour_value", (100 * self.population)/self.num_banks)])
+        for i in range(self.num_banks):
+            bank_acc = "bank" + str(i)
+            self.send_envelope(bank_acc, "wage", (100 * self.population)/self.num_banks)
+
 
     def consume_goods(self):
         self.destroy("goods", 1)
